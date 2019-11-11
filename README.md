@@ -1,6 +1,6 @@
 # 314Proj3
 
-Source code for our team's 314 Project 3!
+Source code for our team's 314 Project 3: the Old File System.
 
 Team members:
 
