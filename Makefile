@@ -4,3 +4,5 @@ push:
 	git add .
 	git commit
 	git push origin master
+pull:
+	git pull
