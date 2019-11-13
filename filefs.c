@@ -17,6 +17,7 @@
 int zerosize(int fd);
 void exitusage(char* pname);
 
+//PLEASE LEAVE COMMENTS -Austin >:(
 
 int main(int argc, char** argv){
   
@@ -35,7 +36,7 @@ int main(int argc, char** argv){
   int filefsname = 0;
  
 
-  
+  //This will grab the command that we want to execute and raise its flag  
   while ((opt = getopt(argc, argv, "la:r:e:f:")) != -1) {
     switch (opt) {
     case 'l':
