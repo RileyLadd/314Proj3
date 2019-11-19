@@ -34,8 +34,13 @@ int main(int argc, char** argv){
   int fd = -1;
   int newfs = 0;
   int filefsname = 0;
- 
 
+  // test section
+  //fd = open("testFile", O_RDWR);
+  //mapfs(fd);
+  //formatfs();
+  //fs[0] = 'a';
+  
   //This will grab the command that we want to execute and raise its flag  
   while ((opt = getopt(argc, argv, "la:r:e:f:")) != -1) {
     switch (opt) {

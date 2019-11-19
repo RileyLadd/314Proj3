@@ -12,9 +12,25 @@ void unmapfs(){
   munmap(fs, FSSIZE);
 }
 
-
 void formatfs(){
+  struct superblock sb = {NUMBLOCKS, NUMBLOCKS, NUMBLOCKS};
+  int headSize = sizeof(struct superblock) + NUMBLOCKS + sizeof(struct inode);
 
+  // following code probably won't work but idk
+  
+  // write superblock data to fs
+  fs[0] = (char)sb.freeBlockListSize;
+  fs[1] = (char)sb.numInodes;
+  fs[2] = (char)sb.numBlocks;
+
+  // write free blocks to fs
+  for (int i = 4; i < NUMBLOCKS; i++) {
+    fs[4] = '0';
+  }
+
+  // write root to fs
+  
+  
 }
 
 
