@@ -64,6 +64,11 @@ int main(int argc, char** argv){
       fsname = strdup(optarg);
       break;
     default:
+      printf("Did not call command correctly!\nShould be one of the following formats\n");
+      printf("./filefs -l -f example\n");
+      printf("./filefs -a a/b/c -f example\n");
+      printf("./filefs -r a/b/c -f example\n");
+      printf("./filefs -e a/b/c -f example > foobar\n");
       exitusage(argv[0]);
     }
   }
@@ -125,7 +130,7 @@ int main(int argc, char** argv){
   return 0;
 }
 
-
+//Fucntion zerosize will only return a flag of 1 or 0 depending if stats.st_size is zero or not
 int zerosize(int fd){
   struct stat stats;
   fstat(fd, &stats);
