@@ -1,0 +1,5 @@
+look into sha1 or sha something
+use it on a block and store the value into hash table
+compare those values to see if blocks are same
+use for extra credit
+use md5sum on command line on files to see
