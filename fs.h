@@ -19,14 +19,14 @@ int loadfbl;
 int loadinode;
 int loadblock;
 
-struct superblock {
+typedef struct superblock {
   int freeBlockListSize, numInodes, numBlocks;
-};
+} superblock;
 
 // does this even need to exist?
 //short int freeBlockList[NUMBLOCKS];
 
-struct inode {
+typedef struct inode {
   // if file, NULL
   // char directoryName[256];
   int inuse;
@@ -36,19 +36,19 @@ struct inode {
   int size;
   // contains ids of relevant data blocks
   int blockRef[100];
-};
+} inode;
 
-struct freeblockslist {
+typedef struct freeblockslist {
   int freeBlocks[NUMBLOCKS];
-};
+} freeblockslist;
 
-struct block {
+typedef struct block {
   char data[BLOCKSIZE];
-};
+} block;
 
-struct directoryEntry {
+typedef struct directoryEntry {
   char name[256];
-};
+} directoryEntry;
 
 /* example
    struct inode{

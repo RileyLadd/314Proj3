@@ -1,4 +1,5 @@
 #include "fs.h"
+#include <string.h>
 
 void mapfs(int fd){
   if ((fs = mmap(NULL, FSSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == NULL){
@@ -72,6 +73,19 @@ void lsfs(){
 }
 
 void addfilefs(char* fname){
+  if(strcmp(fname, "root") == 0) { //we need to add the root (home) directory
+    freeblockslist* fbl = fs + sizeof(superblock);
+    fbl->freeBlocks[0] = 1;
+    inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
+    in->inuse = 1; //indicates inode is being used
+    in->type = 0; //0 indicates this is a directory
+    in->size = 1; //only using 1 data block
+    in->blockRef[0] = 0; // data block being used is at index 0
+
+    // Now we need to format the root directory shtuff/data block
+    
+  }
+
   FILE * myfile = fopen(fname, "r");
   if(myfile == NULL) {
 	printf("ERROR: Could not open %s for reading. Exiting.\n", fname);
