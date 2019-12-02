@@ -14,9 +14,10 @@
 unsigned char* fs;
 
 // values taken from existing fs being loaded
-int loadfbl = 0;
-int loadinode = 0;
-int loadblock = 0;
+// originally set these 3 equal to 0; Riley changed
+int loadfbl;
+int loadinode;
+int loadblock;
 
 struct superblock {
   int freeBlockListSize, numInodes, numBlocks;

@@ -72,7 +72,15 @@ void lsfs(){
 }
 
 void addfilefs(char* fname){
+  FILE * myfile = fopen(fname, "r");
+  if(myfile == NULL) {
+	printf("ERROR: Could not open %s for reading. Exiting.\n", fname);
+	exit(1);
+  }
+  
 
+
+  fclose(myfile);
 }
 
 
