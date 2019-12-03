@@ -1,5 +1,7 @@
 #include "fs.h"
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 void mapfs(int fd){
   if ((fs = mmap(NULL, FSSIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == NULL){
@@ -72,8 +74,10 @@ void lsfs(){
   
 }
 
-void addfilefs(char* fname){
+void addfilefs(const char* fname){
   if(strcmp(fname, "root") == 0 && nextInode() == 0) { //we need to add the root (home) directory
+    int i = 0, currblock = 0;
+    int totalblocksused = 0;
     freeblockslist* fbl = fs + sizeof(superblock);
     fbl->freeBlocks[0] = 1;
     inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
@@ -81,8 +85,39 @@ void addfilefs(char* fname){
     in->type = 0; //0 indicates this is a directory
     in->size = 1; //only using 1 data block
     in->blockRef[0] = 0; // data block being used is at index 0
-
+    //printf("ree\n");
     // Now we need to format the root directory shtuff/data block
+    directoryEntry* dentry = (directoryEntry *) malloc(sizeof(directoryEntry));
+    (*dentry).name = (char *) malloc(256);
+    //(*dentry).name2 = (char *) malloc(2569999999);
+    for(i = 0; i < 100; i++) {
+      (*dentry).files[i] = (char *) malloc(256);
+    }
+    strcpy( (*dentry).name, fname);
+    //printf("ree2\n");
+    dentry->inuse = 0; //nothing in the root directory yet
+    //printf("size of directory entry is %d\n", sizeof(*dentry));
+
+    totalblocksused = (256 + 100*256) / 512 + 1;
+    printf("total blocks used: %d\n", totalblocksused);
+    in->size = totalblocksused;
+    for(i = 0; i < totalblocksused; i++) {
+      currblock = nextBlock();
+      in->blockRef[i] = currblock;
+      fbl->freeBlocks[currblock] = 1;
+    }
+    //block* blockthing = fs + stuff;
+    char * currmem = fs;
+    for( i = 0; i < totalblocksused; i++) {
+      //fwrite( (*dentry).name, 256, 1, fs );
+      //fwrite( (*dentry)
+      if(i == 0) {
+	currmem = fname;
+	currmem += 256;
+      }
+      currmem = (*dentry).files[i];
+      currmem += 256;
+    }
     
   }
 

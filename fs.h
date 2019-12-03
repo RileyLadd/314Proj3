@@ -47,7 +47,10 @@ typedef struct block {
 } block;
 
 typedef struct directoryEntry {
-  char name[256];
+  char * name;
+  //char * name2;
+  char * files[100]; // which can include directories
+  int inuse; //1 is inuse, 0 is empty/invalid
 } directoryEntry;
 
 /* example
@@ -66,7 +69,7 @@ void unmapfs();
 void formatfs();
 void loadfs();
 void lsfs();
-void addfilefs(char* fname);
+void addfilefs(const char* fname);
 void removefilefs(char* fname);
 void extractfilefs(char* fname);
 
