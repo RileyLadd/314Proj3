@@ -73,7 +73,7 @@ void lsfs(){
 }
 
 void addfilefs(char* fname){
-  if(strcmp(fname, "root") == 0) { //we need to add the root (home) directory
+  if(strcmp(fname, "root") == 0 && nextInode() == 0) { //we need to add the root (home) directory
     freeblockslist* fbl = fs + sizeof(superblock);
     fbl->freeBlocks[0] = 1;
     inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
@@ -105,4 +105,33 @@ void removefilefs(char* fname){
 
 void extractfilefs(char* fname){
 
+}
+
+// EXTRA FUNCTIONS WE DEFINED
+
+int nextInode() {
+  int myinode = 0;
+  inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
+  while(in->inuse != 0) {
+    in = in + sizeof(inode);
+    myinode++;
+  }
+  
+  
+  return myinode;
+}
+int nextBlock() {
+  int myblock = 0;
+  freeblockslist* fbl = fs + sizeof(superblock);
+  //NUMBLOCKS = 10000
+  while(fbl->freeBlocks[myblock] != 0 && myblock < NUMBLOCKS) {
+    myblock++;
+  }
+  if(myblock == NUMBLOCKS) {
+    printf("ERROR: There are no free blocks. File system is full. Exiting.\n");
+    exit(1);
+  }
+
+  return myblock;
+  
 }

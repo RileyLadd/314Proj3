@@ -70,4 +70,7 @@ void addfilefs(char* fname);
 void removefilefs(char* fname);
 void extractfilefs(char* fname);
 
+int nextInode();
+int nextBlock();
+
 #endif
