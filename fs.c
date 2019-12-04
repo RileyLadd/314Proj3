@@ -83,6 +83,17 @@ void lsfs(){
     //printf("%d\n", in->inuse);
     //printf("size of inode is %d\n", sizeof(inode));
     printf("%s\n", in->fileName);
+
+    /* // NOTE:
+       // UNCOMMENT THIS SECTION TO VIEW THE DATA BLOCKS EACH INODE REFERENCES
+       // THIS HELPS TO SEE THAT NO BLOCKS ARE DUPLICATED
+    
+    for(int i = 0; i < 100; i++) {
+      printf("%d ", in->blockRef[i]);
+    }
+    printf("\n");
+    */
+    
     in += sizeof(inode);
     //printf("%d\n", in->inuse);
   }
@@ -161,7 +172,11 @@ void addfilefs(const char* fname, int fileSize){
     int fd = -1;
     struct stat stats;
     int filesize = 0;
-    
+
+    //fields used for duplicate checking
+    char * dupcheck;
+    int dupflag; //0 for no dup, 1 for dup
+      
     int currBlock = 0;
     char* lastpath;
     char* path = strtok(fname, "/");
@@ -184,7 +199,7 @@ void addfilefs(const char* fname, int fileSize){
     inode* freein;
     //freein =  fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*freeInode;
     char* currmem = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100;
-
+    dupcheck = currmem + BLOCKSIZE*51;
     freeInode = 0;
     freein = fs + sizeof(superblock) + sizeof(freeblockslist);
     while(freein->inuse == 1) {
@@ -212,8 +227,11 @@ void addfilefs(const char* fname, int fileSize){
     while(path != NULL) {
       //printf("%s\n", path);
       lastpath = path;
+      strcat(freein->fileName, "/");
+      strcat(freein->fileName, lastpath);
       path = strtok(NULL, "/");
     }
+    printf("%s\n", freein->fileName);
     if(path == NULL) {
       //strcpy(path, lastpath);
     }
@@ -246,7 +264,7 @@ void addfilefs(const char* fname, int fileSize){
     */
     
     // create inode for file
-    strcpy(freein->fileName, fname);
+    // strcpy(freein->fileName, fname);
     freein->inuse = 1;
     //strcpy(freein->inuse, "1");
     freein->type = 1;
@@ -260,8 +278,33 @@ void addfilefs(const char* fname, int fileSize){
       for(int j = 0; j < 512; j++) {
 	currmem[j] = fgetc(myfile);
       }
+      // Check if most recently written block is a Duplicate block
+      for(int b = 51; b < NUMBLOCKS; b++) {
+	
+	  dupflag = 1;
+	  currBlock = b; //the existing block we're currently checking against
+	  if(currBlock != freeBlock && fbl->freeBlocks[currBlock] == 1) { //prevents checking block against itself and makes sure block is in use
+	    //dupcheck += BLOCKSIZE*currBlock;
+	    dupcheck = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100 + BLOCKSIZE*currBlock;
+	    for( int j = 0; j < 512; j++ ) {
+	      if(currmem[j] != dupcheck[j]) {
+		//break;
+		dupflag = 0;
+	      }
+	      if( dupflag == 1 && j == 511 && (currmem[j] == dupcheck[j]) ) {
+		freein->blockRef[i] = currBlock;
+		fbl->freeBlocks[currBlock] = 1;
+		fbl->freeBlocks[freeBlock] = 0;
+		
+	      }
+	      
+	    }
+	  } 
+      }
+      
       //currmem[i] = (char) myfile[i];
       //fwrite(currmem, 512, 1, myfile);
+      currBlock = freeBlock;
       freeBlock = nextBlock();
     }
 
