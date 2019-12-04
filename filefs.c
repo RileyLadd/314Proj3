@@ -17,7 +17,6 @@
 int zerosize(int fd);
 void exitusage(char* pname);
 
-//PLEASE LEAVE COMMENTS -Austin >:(
 
 int main(int argc, char** argv){
   
@@ -99,9 +98,6 @@ int main(int argc, char** argv){
   loadfs();
   
   if (add){
-    //struct stat stats;
-    
-    //fstat(fd, &stats);
     addfilefs(toadd, -1);
   }
 

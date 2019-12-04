@@ -21,19 +21,19 @@ void unmapfs(){
 
 void formatfs(){
 
-  // format superblock
+  // Format superblock
   struct superblock* sb = fs;
   sb->freeBlockListSize = NUMBLOCKS;
   sb->numInodes = NUM_INODES;
   sb->numBlocks = NUMBLOCKS;
 
-  // format freeblockslist
+  // Format freeblockslist
   struct freeblockslist* fbl = fs + sizeof(struct superblock);
   for (int i = 0; i < NUMBLOCKS; i++) {
     fbl->freeBlocks[i] = 0;
   }
   
-  // format inodes
+  // Format inodes
   struct inode* inodes = fs + sizeof(struct superblock) + sizeof(struct freeblockslist);
   for (int i = 0; i < NUM_INODES; i++) {
    
@@ -43,30 +43,19 @@ void formatfs(){
     for (int j = 0; j < 100; j++) {
       inodes[i].blockRef[j] = -1;
     }
-    //inodes += sizeof(inode);
+
   }
 
-  // this step is probably meaningless for now
-  // format blocks
+  // Format blocks
   struct block* blocks = fs + sizeof(struct superblock) + sizeof(struct freeblockslist) + sizeof(struct inode)*NUM_INODES;
 
-  // create root directory
+  // Create root directory
   addfilefs("root", 0);
   
 }
 
 
 void loadfs(){
-
-  /* How to use fs for integers, as example.
-     irrelevant to have here. just put it here
-     for safe keeping
-
-  int* intarray = fs;
-
-  intarray[0] = 9099;
-  intarray[100] = 934;
-  */
   
   struct superblock* sb = fs;
   loadfbl = sb->freeBlockListSize;
@@ -80,8 +69,7 @@ void lsfs(){
   inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
   printf("File System Contents:\n");
   while(in->inuse != 0) {
-    //printf("%d\n", in->inuse);
-    //printf("size of inode is %d\n", sizeof(inode));
+   
     printf("%s\n", in->fileName);
 
     /* // NOTE:
@@ -95,87 +83,44 @@ void lsfs(){
     */
     
     in += sizeof(inode);
-    //printf("%d\n", in->inuse);
   }
 }
 
 void addfilefs(const char* fname, int fileSize){
   
 
-  if(strcmp(fname, "root") == 0 && nextInode() == 0) { //we need to add the root (home) directory
+  if(strcmp(fname, "root") == 0 && nextInode() == 0) { // We need to add the root (home) directory
     int i = 0, currblock = 0;
     int totalblocksused = 0;
     char* currmem = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100;
     freeblockslist* fbl = fs + sizeof(superblock);
-    //fbl->freeBlocks[0] = 1;
     inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
-    in->inuse = 1; //indicates inode is being used
-    in->type = 0; //0 indicates this is a directory
-    in->size = 25860; //each name 256bytes large, 101 names in a directory, int 4bytes large
+    in->inuse = 1;	// Indicates inode is being used
+    in->type = 0; 	// 0 indicates this is a directory
+    in->size = 25860; 	// Each name 256bytes large, 101 names in a directory, int 4bytes large
 
-    // file name into inode
+    // File name into inode
     strcpy(in->fileName, "/root");
     
-    // directories need 51 blocks
+    // Directories need 51 blocks
     for (int i = 0; i < 51; i++) {
-      in->blockRef[i] = i; // data block being used is at index i
+      in->blockRef[i] = i; // Data block being used is at index i
       fbl->freeBlocks[i] = 1;
       
     }
     in += sizeof(inode);
-    //in->inuse = 1;
-    //strcpy(in->fileName, "test"); 
-    //printf("inode inuse val at index 100 is %d\n", fbl->freeBlocks[100]);
-    /*
-    //printf("ree\n");
-    // Now we need to format the root directory shtuff/data block
-    directoryEntry* dentry = (directoryEntry *) malloc(sizeof(directoryEntry));
-    (*dentry).name = (char *) malloc(256);
-    //(*dentry).name2 = (char *) malloc(2569999999);
-    for(i = 0; i < 100; i++) {
-      (*dentry).files[i] = (char *) malloc(256);
-    }
-    strcpy( (*dentry).name, fname);
-    //printf("ree2\n");
-    dentry->inuse = 0; //nothing in the root directory yet
-    //printf("size of directory entry is %d\n", sizeof(*dentry));
-
-    totalblocksused = (256 + 100*256) / 512 + 1;
-    printf("total blocks used: %d\n", totalblocksused);
-    //in->size = totalblocksused;
-    for(i = 0; i < totalblocksused; i++) {
-      currblock = nextBlock();
-      in->blockRef[i] = currblock;
-      fbl->freeBlocks[currblock] = 1;
-    }
-    //block* blockthing = fs + stuff;
-    char * currmem = fs;
-    for( i = 0; i < totalblocksused; i++) {
-      //fwrite( (*dentry).name, 256, 1, fs );
-      //fwrite( (*dentry)
-      if(i == 0) {
-	currmem = fname;
-	currmem += 256;
-      }
-      currmem = (*dentry).files[i];
-      currmem += 256;
-    }
-    */
-
-    // put root name into first block
-    //strcpy(currmem, fname);
     
-  } // end of root
+  } // End of root creation
 
   else {
-    // printf("ree\n");
+    
     int fd = -1;
     struct stat stats;
     int filesize = 0;
 
-    //fields used for duplicate checking
+    // Fields used for duplicate checking
     char * dupcheck;
-    int dupflag; //0 for no dup, 1 for dup
+    int dupflag; // 0 for no dup, 1 for dup
       
     int currBlock = 0;
     char* lastpath;
@@ -183,21 +128,20 @@ void addfilefs(const char* fname, int fileSize){
     int pathExists;
     int pathLength = 1;
     int blocksNeeded;
-    //printf("filesize is %d\n", fileSize);
+    
     int freeInode = nextInode();
     
     if(strcmp(fname, "testFile") == 0) {
       freeInode = 2;
     }
-    //int freeInode = 3;
-    //printf("free inode is %d\n", freeInode);
+    
     int freeBlock = nextBlock();
     int i = 1;
     freeblockslist* fbl = fs + sizeof(superblock);
-    //fbl->freeBlocks[0] = 1;
+    
     inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
     inode* freein;
-    //freein =  fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*freeInode;
+    
     char* currmem = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100;
     dupcheck = currmem + BLOCKSIZE*51;
     freeInode = 0;
@@ -206,35 +150,13 @@ void addfilefs(const char* fname, int fileSize){
       freein += sizeof(inode);
       freeInode++;
     }
-    //printf("%c\n", fname[2]);
-    // printf("ree\n");
-    // divide path
-    //printf("%s\n", fname);
-    //strcpy(path[0], strtok(fname, '/'));
-    /*
-    for (int i = 1; i < 10; i++) {
-      path[i] = strtok(NULL, '/');
-    }
-    */
-    //printf("ree\n");
-    /*
-    while ((strcpy(path[i], strtok(NULL, '/'))) != NULL) {
-      i++;
-      printf("%d\n", i);
-      pathLength++;
-    }
-    */
-    //strcat(freein->fileName, "/root");
+    
     while(path != NULL) {
-      //printf("%s\n", path);
+      
       lastpath = path;
       strcat(freein->fileName, "/");
       strcat(freein->fileName, lastpath);
       path = strtok(NULL, "/");
-    }
-    //printf("%s\n", freein->fileName);
-    if(path == NULL) {
-      //strcpy(path, lastpath);
     }
     
     fd = open(lastpath, O_RDONLY);
@@ -249,34 +171,15 @@ void addfilefs(const char* fname, int fileSize){
     
     FILE * myfile = fopen(lastpath, "r");
     if(myfile == NULL) {
-      //printf("path is %s\n", lastpath);
+      
       printf("ERROR: Could not open %s for reading. Exiting.\n", fname);
       exit(1);
-    } else {
-      //printf("opened %s\n", lastpath);
     }
-    //printf("%s\n", fname);
     
-    // check if directory exists
-    /*
-    while (in->inuse != 0) {
-      if (strcmp(in->fileName, fname) >= 0;) { pathExists = 1; }
-      in += sizeof(inode);
-    }
-
-    // create subdirectories if not exist
-    if (pathExists == 0) {
-      for (i = 0; i < pathLe
-    }
-    */
-    
-    // create inode for file
-    // strcpy(freein->fileName, fname);
     freein->inuse = 1;
-    //strcpy(freein->inuse, "1");
     freein->type = 1;
     freein->size = filesize;
-    //printf("%d blocks needed\n", blocksNeeded);
+    
     for (i = 0; i < blocksNeeded; i++) {
       currmem += (sizeof(block)*(freeBlock - currBlock));
       currBlock = freeBlock;
@@ -289,13 +192,13 @@ void addfilefs(const char* fname, int fileSize){
       for(int b = 51; b < NUMBLOCKS; b++) {
 	
 	  dupflag = 1;
-	  currBlock = b; //the existing block we're currently checking against
-	  if(currBlock != freeBlock && fbl->freeBlocks[currBlock] == 1) { //prevents checking block against itself and makes sure block is in use
-	    //dupcheck += BLOCKSIZE*currBlock;
+	  currBlock = b; // The existing block we're currently checking against
+	  if(currBlock != freeBlock && fbl->freeBlocks[currBlock] == 1) { // Prevents checking block against itself and makes sure block is in use
+	   
 	    dupcheck = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100 + BLOCKSIZE*currBlock;
 	    for( int j = 0; j < 512; j++ ) {
 	      if(currmem[j] != dupcheck[j]) {
-		//break;
+		
 		dupflag = 0;
 	      }
 	      if( dupflag == 1 && j == 511 && (currmem[j] == dupcheck[j]) ) {
@@ -309,28 +212,13 @@ void addfilefs(const char* fname, int fileSize){
 	  } 
       }
       
-      //currmem[i] = (char) myfile[i];
-      //fwrite(currmem, 512, 1, myfile);
+      
       currBlock = freeBlock;
       freeBlock = nextBlock();
     }
 
-    //printf("free inode # is %d, inuse flag is %d\n", freeInode, freein->inuse);
-
-    // write file data to blocks
-
     fclose(myfile);
   }
-  /*
-  FILE * myfile = fopen(fname, "r");
-  if(myfile == NULL) {
-	printf("ERROR: Could not open %s for reading. Exiting.\n", fname);
-	exit(1);
-  }
-  */
-
-
-  //fclose(myfile);
 }
 
 
@@ -356,16 +244,7 @@ void extractfilefs(char* fname){
   inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
   int i = 0, j = 0, sizecounter = 0;
   char * read = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100;
-  /*
-  char* lastpath;
-  char* path = strtok(fname, "/");
-  
-  while(path != NULL) {
-      //printf("%s\n", path);
-      lastpath = path;
-      path = strtok(NULL, "/");
-    }
-  */
+ 
   while(in->inuse == 1) {
     if(strcmp(fname, in->fileName) == 0) {
       break;
@@ -376,10 +255,8 @@ void extractfilefs(char* fname){
     printf("Specified file does not exist in this file system. Exiting.\n");
     exit(1);
   }
-  //printf("file size is %d\n", in->size);
-  //printf("using inode with name of %s\n", in->fileName);
+  
   while(in->blockRef[j] > 0) {
-    //printf("the very nice block reference number is a marvelous thing to behold and its value is %d\n", in->blockRef[j]);
     read = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100 + 512*(in->blockRef[j]);
     for(i = 0; i < 512; i++) {
       printf("%c", read[i]);
@@ -393,16 +270,12 @@ void extractfilefs(char* fname){
 }
 
 // EXTRA FUNCTIONS WE DEFINED
-//don't use nextInode() because it doesn't work for unknown reasons
+// Don't use nextInode() because it doesn't work for unknown reasons
 int nextInode() {
   int myinode = 0;
   inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
-  //printf("before while: inuse is %d %s\n", in->inuse, in->fileName);
   while(in->inuse != 0) {
-    //printf("in while: inuse is %d %s\n", in->inuse, in->fileName);
     in += sizeof(inode);
-    //in->inuse = 1;
-    //printf("%d\n", in->inuse);
     myinode++;
     if (myinode >= 100) {
       printf("ERROR: Out of inodes! Exiting.\n");
@@ -417,8 +290,6 @@ int nextInode() {
 int nextBlock() {
   int myblock = 0;
   freeblockslist* fbl = fs + sizeof(superblock);
-  //NUMBLOCKS = 10000
-  //printf("%d\n", fbl->freeBlocks[0]);
   while(fbl->freeBlocks[myblock] != 0 && myblock < NUMBLOCKS) {
     myblock++;
   }

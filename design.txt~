@@ -1,7 +1,0 @@
-Our design has the superblock containing information of our specific file system, such as the size of the free block list. We implemented the fbl as an array of 0s or 1s to indicate whether the block (index of the array) is in use or not. The inodes were a series of structs containing information about each file such as its type, size, name, and the blocks containing its data represented as an array. i
-
-
-
-Problems:
-
-We were unable to get directory entries to work. The path names are instead pseudo directories and subdirectories; however, the implementation allows for each function to (mostly) work. 

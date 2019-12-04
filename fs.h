@@ -7,7 +7,6 @@
 
 #define FSSIZE 10000000
 #define BLOCKSIZE 512
-// (FSSIZE - 1MB) / BLOCKSIZE
 #define NUMBLOCKS 10000
 #define NUM_INODES 100
 
@@ -23,16 +22,12 @@ typedef struct superblock {
   int freeBlockListSize, numInodes, numBlocks;
 } superblock;
 
-// does this even need to exist?
-//short int freeBlockList[NUMBLOCKS];
 
 typedef struct freeblockslist {
   int freeBlocks[NUMBLOCKS];
 } freeblockslist;
 
 typedef struct inode {
-  // if file, NULL
-  //
   char fileName[256];
 
   int inuse;
@@ -50,21 +45,9 @@ typedef struct block {
 
 typedef struct directoryEntry {
   char * name;
-  //char * name2;
-  char * files[100]; // which can include directories
-  int inuse; //1 is inuse, 0 is empty/invalid
+  char * files[100]; 	// Which can include directories
+  int inuse; 		// 1 is inuse, 0 is empty/invalid
 } directoryEntry;
-
-/* example
-   struct inode{
-     int inuse;
-     int type;
-     int size;
-     //initialize to -1
-     int blocks[100];
-   };
-
- */
 
 void mapfs(int fd);
 void unmapfs();
