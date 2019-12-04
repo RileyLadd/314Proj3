@@ -37,13 +37,13 @@ void formatfs(){
   struct inode* inodes = fs + sizeof(struct superblock) + sizeof(struct freeblockslist);
   for (int i = 0; i < NUM_INODES; i++) {
    
-    inodes->inuse = 0;
-    inodes->type = -1;
-    inodes->size = -1;
+    inodes[i].inuse = 0;
+    inodes[i].type = -1;
+    inodes[i].size = -1;
     for (int j = 0; j < 100; j++) {
-      inodes->blockRef[j] = -1;
+      inodes[i].blockRef[j] = -1;
     }
-    inodes += sizeof(inode);
+    //inodes += sizeof(inode);
   }
 
   // this step is probably meaningless for now
@@ -250,14 +250,18 @@ void addfilefs(const char* fname, int fileSize){
     freein->inuse = 1;
     //strcpy(freein->inuse, "1");
     freein->type = 1;
-    freein->size = fileSize;
+    freein->size = filesize;
     //printf("%d blocks needed\n", blocksNeeded);
     for (i = 0; i < blocksNeeded; i++) {
       currmem += (sizeof(block)*(freeBlock - currBlock));
       currBlock = freeBlock;
       freein->blockRef[i] = freeBlock;
       fbl->freeBlocks[freeBlock] = 1;
-      fwrite(currmem, 512, 1, myfile);
+      for(int j = 0; j < 512; j++) {
+	currmem[j] = fgetc(myfile);
+      }
+      //currmem[i] = (char) myfile[i];
+      //fwrite(currmem, 512, 1, myfile);
       freeBlock = nextBlock();
     }
 
@@ -287,10 +291,10 @@ void removefilefs(char* fname){
 
 void extractfilefs(char* fname){
   inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
-  int i = 0, j = 0, fuckDyllybar = 69420;
+  int i = 0, j = 0, sizecounter = 0;
   char * read = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100;
   while(in->inuse == 1) {
-    if(strcmp(fname, in->fileName) <= 0) {
+    if(strcmp(fname, in->fileName) == 0) {
       break;
     }
     in += sizeof(inode);
@@ -299,13 +303,17 @@ void extractfilefs(char* fname){
     printf("Specified file does not exist in this file system. Exiting.\n");
     exit(1);
   }
-  
-  printf("using inode with name of %s\n", in->fileName);
-  while(in->blockRef[j] != -1) {
-    printf("the very nice block reference number is a marvelous thing to behold and its value is %d\n", in->blockRef[j]);
+  //printf("file size is %d\n", in->size);
+  //printf("using inode with name of %s\n", in->fileName);
+  while(in->blockRef[j] > 0) {
+    //printf("the very nice block reference number is a marvelous thing to behold and its value is %d\n", in->blockRef[j]);
     read = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100 + 512*(in->blockRef[j]);
     for(i = 0; i < 512; i++) {
-      //printf("%c", read[i]);
+      printf("%c", read[i]);
+      sizecounter++;
+      if(sizecounter == in->size) {
+	return;
+      }
     }
     j++;
   }
