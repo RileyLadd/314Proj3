@@ -1,0 +1,15 @@
+Our design has the superblock containing information of our specific file system, such as the size of the free block list. We implemented the fbl as an array of 0s or 1s to indicate whether the block (index of the array) is in use or not. The inodes were a series of structs containing information about each file such as its type, size, name, and the blocks containing its data represented as an array. In our file system, there are only 10,000 blocks of 512bytes each.
+
+When a file is added, its size is calculated to determine how many blocks it requires. The first free inode is used to store the information about the file. As the file is sectioned into blocks, the current block is compared to each block within the file system that's in use to ensure there are no duplicates.
+
+Since inodes contain the file names, listing the contents of the file system simply finds each inode that's inuse and lists the name of the file contained within it.
+
+Removing a file from the file system finds the inode referring to the file and marks it as not inuse. This prevents it from being listed.
+
+To extract a file, the inode containing the specified file is located, and the direct block references are followed until the file size is reached at the final block.
+
+
+
+Problems:
+
+We were unable to get directory entries to work. The time spent trying to figure out directories was approximately equal to the time we spent on the rest of the project, so we took a different approach to at least see if we could create a semblance of a properly functioning filesystem. The path names are instead pseudo directories and subdirectories; however, the implementation allows for each function to work. 

@@ -114,7 +114,7 @@ void addfilefs(const char* fname, int fileSize){
     in->size = 25860; //each name 256bytes large, 101 names in a directory, int 4bytes large
 
     // file name into inode
-    strcpy(in->fileName, fname);
+    strcpy(in->fileName, "/root");
     
     // directories need 51 blocks
     for (int i = 0; i < 51; i++) {
@@ -163,7 +163,7 @@ void addfilefs(const char* fname, int fileSize){
     */
 
     // put root name into first block
-    strcpy(currmem, fname);
+    //strcpy(currmem, fname);
     
   } // end of root
 
@@ -224,6 +224,7 @@ void addfilefs(const char* fname, int fileSize){
       pathLength++;
     }
     */
+    //strcat(freein->fileName, "/root");
     while(path != NULL) {
       //printf("%s\n", path);
       lastpath = path;
@@ -231,14 +232,20 @@ void addfilefs(const char* fname, int fileSize){
       strcat(freein->fileName, lastpath);
       path = strtok(NULL, "/");
     }
-    printf("%s\n", freein->fileName);
+    //printf("%s\n", freein->fileName);
     if(path == NULL) {
       //strcpy(path, lastpath);
     }
+    
     fd = open(lastpath, O_RDONLY);
     fstat(fd, &stats);
     filesize = stats.st_size;
     blocksNeeded = filesize/BLOCKSIZE + 1;
+
+    if(filesize > 9000000) {
+      printf("ERROR: File is too large to fit in file system.\n");
+      exit(1);
+    }
     
     FILE * myfile = fopen(lastpath, "r");
     if(myfile == NULL) {
@@ -328,7 +335,20 @@ void addfilefs(const char* fname, int fileSize){
 
 
 void removefilefs(char* fname){
+  inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
 
+  while(in->inuse == 1) {
+    if(strcmp(fname, in->fileName) == 0) {
+      break;
+    }
+    in += sizeof(inode);
+  }
+  if (in->inuse == 0) {
+    printf("File does not exist\n");
+    exit(1);
+  }
+  in->inuse = 0;
+  
 }
 
 
@@ -336,6 +356,16 @@ void extractfilefs(char* fname){
   inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
   int i = 0, j = 0, sizecounter = 0;
   char * read = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100;
+  /*
+  char* lastpath;
+  char* path = strtok(fname, "/");
+  
+  while(path != NULL) {
+      //printf("%s\n", path);
+      lastpath = path;
+      path = strtok(NULL, "/");
+    }
+  */
   while(in->inuse == 1) {
     if(strcmp(fname, in->fileName) == 0) {
       break;
