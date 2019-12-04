@@ -74,21 +74,27 @@ void lsfs(){
   
 }
 
-void addfilefs(const char* fname){
+void addfilefs(const char* fname, int fileSize){
   if(strcmp(fname, "root") == 0 && nextInode() == 0) { //we need to add the root (home) directory
     int i = 0, currblock = 0;
     int totalblocksused = 0;
+    char* currmem = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100;
     freeblockslist* fbl = fs + sizeof(superblock);
     //fbl->freeBlocks[0] = 1;
     inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
     in->inuse = 1; //indicates inode is being used
     in->type = 0; //0 indicates this is a directory
-    in->size = 25856; //each name 256bytes large, 101 names in a directory
+    in->size = 25860; //each name 256bytes large, 101 names in a directory, int 4bytes large
+
+    // file name into inode
+    strcpy(in->fileName, fname);
+    
     // director5ies need 51 blocks
     for (int i = 0; i < 51; i++) {
       in->blockRef[i] = i; // data block being used is at index i
       fbl->freeBlocks[i] = 1;
     }
+    /*
     //printf("ree\n");
     // Now we need to format the root directory shtuff/data block
     directoryEntry* dentry = (directoryEntry *) malloc(sizeof(directoryEntry));
@@ -122,9 +128,19 @@ void addfilefs(const char* fname){
       currmem = (*dentry).files[i];
       currmem += 256;
     }
+    */
 
+    // put root name into first block
+    strcpy(currmem, fname);
     
-    
+  } // end of root
+
+  else {
+    int blocksNeeded = (fileSize / BLOCKSIZE) + 1;
+    freeblockslist* fbl = fs + sizeof(superblock);
+    //fbl->freeBlocks[0] = 1;
+    inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
+    char* currmem = fs + sizeof(superblock) + sizeof(freeblockslist) + sizeof(inode)*100;
   }
 
   FILE * myfile = fopen(fname, "r");
@@ -156,6 +172,7 @@ int nextInode() {
   while(in->inuse != 0) {
     in = in + sizeof(inode);
     myinode++;
+    if (myinode > 100) { return -1; }
   }
   
   

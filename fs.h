@@ -26,9 +26,15 @@ typedef struct superblock {
 // does this even need to exist?
 //short int freeBlockList[NUMBLOCKS];
 
+typedef struct freeblockslist {
+  int freeBlocks[NUMBLOCKS];
+} freeblockslist;
+
 typedef struct inode {
   // if file, NULL
-  // char directoryName[256];
+  //
+  char fileName[256];
+
   int inuse;
   // can be f (1) or d (0)
   int type;
@@ -37,10 +43,6 @@ typedef struct inode {
   // contains ids of relevant data blocks
   int blockRef[100];
 } inode;
-
-typedef struct freeblockslist {
-  int freeBlocks[NUMBLOCKS];
-} freeblockslist;
 
 typedef struct block {
   char data[BLOCKSIZE];
@@ -69,7 +71,7 @@ void unmapfs();
 void formatfs();
 void loadfs();
 void lsfs();
-void addfilefs(const char* fname);
+void addfilefs(const char* fname, int fileSize);
 void removefilefs(char* fname);
 void extractfilefs(char* fname);
 

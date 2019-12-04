@@ -99,7 +99,9 @@ int main(int argc, char** argv){
   loadfs();
   
   if (add){
-    addfilefs(toadd);
+    struct stat stats;
+    fstat(fd, &stats);
+    addfilefs(toadd, stats.st_size);
   }
 
   if (remove){
