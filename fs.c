@@ -79,12 +79,16 @@ void addfilefs(const char* fname){
     int i = 0, currblock = 0;
     int totalblocksused = 0;
     freeblockslist* fbl = fs + sizeof(superblock);
-    fbl->freeBlocks[0] = 1;
+    //fbl->freeBlocks[0] = 1;
     inode* in = fs + sizeof(superblock) + sizeof(freeblockslist);
     in->inuse = 1; //indicates inode is being used
     in->type = 0; //0 indicates this is a directory
-    in->size = 1; //only using 1 data block
-    in->blockRef[0] = 0; // data block being used is at index 0
+    in->size = 25856; //each name 256bytes large, 101 names in a directory
+    // director5ies need 51 blocks
+    for (int i = 0; i < 51; i++) {
+      in->blockRef[i] = i; // data block being used is at index i
+      fbl->freeBlocks[i] = 1;
+    }
     //printf("ree\n");
     // Now we need to format the root directory shtuff/data block
     directoryEntry* dentry = (directoryEntry *) malloc(sizeof(directoryEntry));
@@ -100,7 +104,7 @@ void addfilefs(const char* fname){
 
     totalblocksused = (256 + 100*256) / 512 + 1;
     printf("total blocks used: %d\n", totalblocksused);
-    in->size = totalblocksused;
+    //in->size = totalblocksused;
     for(i = 0; i < totalblocksused; i++) {
       currblock = nextBlock();
       in->blockRef[i] = currblock;
@@ -118,6 +122,8 @@ void addfilefs(const char* fname){
       currmem = (*dentry).files[i];
       currmem += 256;
     }
+
+    
     
   }
 

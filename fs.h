@@ -32,7 +32,7 @@ typedef struct inode {
   int inuse;
   // can be f (1) or d (0)
   int type;
-  // num blocks used
+  // num bytes of file
   int size;
   // contains ids of relevant data blocks
   int blockRef[100];
