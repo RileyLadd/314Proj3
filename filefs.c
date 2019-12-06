@@ -98,7 +98,7 @@ int main(int argc, char** argv){
   loadfs();
   
   if (add){
-    addfilefs(toadd, -1);
+    addfilefs(toadd);
   }
 
   if (remove){

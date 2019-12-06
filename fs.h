@@ -1,3 +1,4 @@
+
 #ifndef __FS_H__
 #define __FS_H__
 #include <sys/mman.h>
@@ -24,19 +25,18 @@ typedef struct superblock {
 
 
 typedef struct freeblockslist {
-  int freeBlocks[NUMBLOCKS];
+  short freeBlocks[NUMBLOCKS];
 } freeblockslist;
 
 typedef struct inode {
-  char fileName[256];
-
-  int inuse;
+  short inuse;
   // can be f (1) or d (0)
-  int type;
+  short type;
   // num bytes of file
-  int size;
+  // all directories will get 50 blocks for simplicity
+  unsigned int size;
   // contains ids of relevant data blocks
-  int blockRef[100];
+  short blockRef[100];
 } inode;
 
 typedef struct block {
@@ -44,9 +44,9 @@ typedef struct block {
 } block;
 
 typedef struct directoryEntry {
-  char * name;
-  char * files[100]; 	// Which can include directories
-  int inuse; 		// 1 is inuse, 0 is empty/invalid
+  short inuse;
+  char name[256];
+  short inodeLoc;
 } directoryEntry;
 
 void mapfs(int fd);
@@ -54,11 +54,12 @@ void unmapfs();
 void formatfs();
 void loadfs();
 void lsfs();
-void addfilefs(const char* fname, int fileSize);
+void addfilefs(const char* fname);
 void removefilefs(char* fname);
 void extractfilefs(char* fname);
 
 int nextInode();
-int nextBlock();
+void fileAdder(char* parent, char* filename, int filesize, int isDir);
+int nextBlock(int isDir);
 
 #endif
